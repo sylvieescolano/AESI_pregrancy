@@ -5,21 +5,21 @@ proc datasets lib=work kill;
 run;quit;  
 
 /*Definir la librairie ObservesAttendusAESI*/
-libname rep '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/OE_TEST';
+libname rep '...';
 
 /*Definir la librairie base grossesse*/
-libname baseg '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/Construction_base_20132024';
+libname baseg '...';
 
 
 
 
 
-/*Définition d'une macro de calcul des taux d'incidence 
-d'un AESI défini (diag) 
-recherché pour tous types de diagnostic (DP_only=0) ou principal seulement (DP_only=1)
-pour une période définie (dbtperiode-finperiode)
+/*DÃ©finition d'une macro de calcul des taux d'incidence 
+d'un AESI dÃ©fini (diag) 
+recherchÃ© pour tous types de diagnostic (DP_only=0) ou principal seulement (DP_only=1)
+pour une pÃ©riode dÃ©finie (dbtperiode-finperiode)
 parmi les grossesses selon classe d'age et trimestres
-avec intervalles de confiance à95%*/
+avec intervalles de confiance Ã 95%*/
 
  %macro TI_AESI (dbtperiode=,finperiode=,diag =,DP_only=);
 
@@ -66,7 +66,7 @@ QUIT;
 /*CALCUL DES TAUX D'INCIDENCE PERIODE 1 (dbtperiode-finperiode)*/
 
 
-/*Table des grossesses : sélection des grossesses 
+/*Table des grossesses : sÃ©lection des grossesses 
 (avec LMP-28<finperiode)*/
 
 PROC SQL;
@@ -83,10 +83,10 @@ PROC SQL;
 QUIT;
 
 
-/* RECHERCHE DES DIAG à partir de la table des CIM
+/* RECHERCHE DES DIAG Ã  partir de la table des CIM
 (La table des CIM comprend tous les CIM <=31dec2024 
 pour les BEN_NIR_ANO(BNA) de la base grossesses)
-(tables MCO 13 à 24)*/
+(tables MCO 13 Ã  24)*/
 
 
 PROC SQL;
@@ -105,9 +105,9 @@ AND
 QUIT;
 
 
-/*Grossesses dont le BNA est associé a >1 diagnostic + Ajout des variables:
+/*Grossesses dont le BNA est associÃ© a >1 diagnostic + Ajout des variables:
 - "during" (=1 si diagnostic au cours de T0-T3 : LMP-28 / Evt -1)
--"clean_window" (=1 si diagnostic dans les 365j précédant T0 pour chaque AESI)*/
+-"clean_window" (=1 si diagnostic dans les 365j prÃ©cÃ©dant T0 pour chaque AESI)*/
 
 PROC SQL;
    CREATE TABLE WORK.tmp2 AS 
@@ -132,7 +132,7 @@ PROC SQL;
            left JOIN WORK.DIAG t2 ON (t1.BEN_NIR_ANO = t2.BEN_NIR_ANO);
 QUIT;
 
-/*Catégorie pour chaque grossesse associée au diag via le BNA:
+/*CatÃ©gorie pour chaque grossesse associÃ©e au diag via le BNA:
 -"hors-suivi" si >1 diag dans la clean window
 -"non-cas" si diag hors clean window et "PP"
 -"cas" si aucun diag dans clean window et >1 durant "PP"*/
@@ -171,7 +171,7 @@ QUIT;
 
 /* Variable "out" : diag en dehors de la periode d'etude,
 +definir trimestre du diag,
-+ajouter durées de suivi, +retirer grossesses "hors-suivi"*/
++ajouter durÃ©es de suivi, +retirer grossesses "hors-suivi"*/
 
 
 PROC SQL;
@@ -225,7 +225,7 @@ QUIT;
 
 
 
-/*Calcul des périodes de suivi 
+/*Calcul des pÃ©riodes de suivi 
 (comprises dans periode d'etude et tronquees a la date du diag)*/
 
 
@@ -436,7 +436,7 @@ quit;
 
 
 
-/*Appliquer la macro TI_AESI à une liste de diagnostics
+/*Appliquer la macro TI_AESI Ã  une liste de diagnostics
 (periode 2015-2019, modifiable)*/
 
 %macro TI_AESI_list(diag_list=,DP_only=);
@@ -445,7 +445,7 @@ quit;
         %let diag = %scan(&diag_list, &i);
         
         /* Appliquer macro TI_AESI sur chaque diag de la liste
-		+choix de la période*/
+		+choix de la pÃ©riode*/
         %TI_AESI(dbtperiode='01jan2015'd,finperiode='31dec2019'd,diag=&diag.,DP_only=&DP_only.);
   
     %end;
