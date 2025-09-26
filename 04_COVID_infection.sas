@@ -1,7 +1,7 @@
-/*Objectif: repérer les infections COVID (test ou hospitalisation)
+/*Objectif: repÃ©rer les infections COVID (test ou hospitalisation)
 pour les patientes de la base,
-définir les périodes post-infection COVID (90j),
-calculer les périodes post vac (table allvac_42_covout) hors post inf COVID*/
+dÃ©finir les pÃ©riodes post-infection COVID (90j),
+calculer les pÃ©riodes post vac (table allvac_42_covout) hors post inf COVID*/
 
 /*Supprimer tables de WORK et ORAUSER*/
 proc datasets lib=work kill;
@@ -10,18 +10,18 @@ proc datasets lib=orauser kill;
 run;quit;
 
 /*Definir la librairie ObservesAttendusAESI*/
-libname rep '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/OE_TEST';
+libname rep '...';
 
 /*Definir la librairie base grossesse*/
-libname baseg '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/Construction_base_20132024';
+libname baseg '...';
 
 
 /*REPERAGE VIA TABLE DES DEPISTAGES (DE_DEP_F)*/
 
-/*AJOUT IDENTIFIANT BEN_NIR_ANO (BNA) à la table des vaccinations
-+Les derniers resultats d'infection COVID dans DE_DEP sont datés du 23/06/23 :
+/*AJOUT IDENTIFIANT BEN_NIR_ANO (BNA) Ã  la table des vaccinations
++Les derniers resultats d'infection COVID dans DE_DEP sont datÃ©s du 23/06/23 :
 On retire les vaccinations dont l'information serait potentiellement manquante
-sur la période post vaccinale (date de vaccination max : 42j avant 23/06/23)*/
+sur la pÃ©riode post vaccinale (date de vaccination max : 42j avant 23/06/23)*/
 
 PROC SQL;
    CREATE TABLE WORK.TMP1 AS 
@@ -36,7 +36,7 @@ WHERE t1.dbt_FUvac <"23jun2023"d-42;
 QUIT;
 
 
-/*Créer la table des BNA format ORACLE POUR JOINTURE*/
+/*CrÃ©er la table des BNA format ORACLE POUR JOINTURE*/
 PROC SQL;
    CREATE TABLE ORAUSER.BASE AS 
    SELECT DISTINCT t1.BEN_NIR_ANO
@@ -78,7 +78,7 @@ QUIT;
 /*REPERAGE COVID PARMI HOSPIT (CODES CIM)*/
 
 /*Reperage parmi la table des CIM-10 de la base grossesse
-U07.1 Maladie à coronavirus 2019 [COVID-19]**/
+U07.1 Maladie Ã  coronavirus 2019 [COVID-19]**/
 
 data WORK.COV_CIM (drop= cim diag_type date_diag);
 	set baseG.cim_MAT;
@@ -179,8 +179,8 @@ PROC SQL;
 QUIT;
 
 
-/*Pour chaque vaccin on récupere le max de la nouvelle date de dbt FU calculée,
-et le min de la nouvelle date de fin FU calculée (bornes de la nouvelle période de suivi)
+/*Pour chaque vaccin on rÃ©cupere le max de la nouvelle date de dbt FU calculÃ©e,
+et le min de la nouvelle date de fin FU calculÃ©e (bornes de la nouvelle pÃ©riode de suivi)
 sauf si au moins une nouvelle duree<0 (periode post vac entierement recouverte)*/
 
 PROC SQL;
@@ -213,14 +213,14 @@ PROC SQL;
 QUIT;
 
 
-/*Enregistrer la table avec les nouvelles périodes de FU et données sur les vaccins
+/*Enregistrer la table avec les nouvelles pÃ©riodes de FU et donnÃ©es sur les vaccins
 (on retire si newFU=0)*/
 PROC SQL;
    CREATE TABLE rep.allvac_42_COVOUT AS 
    SELECT DISTINCT t2.indsej, 
           t2.regimen, 
           t2.trimester, 
-          t1.MAX_of_new_start LABEL="Debut FU recalculé" AS dbt_FUvac, 
+          t1.MAX_of_new_start LABEL="Debut FU recalculÃ©" AS dbt_FUvac, 
           t1.MIN_of_new_end LABEL="Fin recalculee" AS fin_FUvac
       FROM WORK.TMP3 t1, REP.ALLVAC_42 t2
       WHERE (t1.indsej = t2.indsej AND t1.dbt_FUvac = t2.dbt_FUvac) 
