@@ -1,6 +1,6 @@
-/*Creation de la table des vaccinations incluses dans la période d'etude
-à partir de la table VACCOVID
-+ Définition des profils vaccinaux et de la période de follow-up*/
+/*Creation de la table des vaccinations incluses dans la pÃ©riode d'etude
+Ã  partir de la table VACCOVID
++ DÃ©finition des profils vaccinaux et de la pÃ©riode de follow-up*/
 
 
 /*Supprimer tables de WORK*/
@@ -8,16 +8,16 @@ proc datasets lib=work kill;
 run;quit;  
 
 /*Definir la librairie ObservesAttendusAESI*/
-libname rep '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/OE_TEST';
+libname rep '...';
 
 /*Definir la librairie base grossesse*/
-libname baseg '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/Construction_base_20132024';
+libname baseg '...';
 
 
 /*PP (pregnancy period) = [LMP-70 ; dat_evt[*/
 
 
-/*Compter le nombre grossesses potentiellement vaccinées durant la PP et avant 23/12/2023*/
+/*Compter le nombre grossesses potentiellement vaccinÃ©es durant la PP et avant 23/12/2023*/
 PROC SQL;
    CREATE TABLE WORK.QUERY AS 
    SELECT (COUNT (DISTINCT (t1.indsej))) AS nb
@@ -100,7 +100,7 @@ PROC SQL;
       FROM WORK.VACCOV t1;
 QUIT;
 
-/*Décrire le numero de dose, le type de vaccin et le trimestre*/
+/*DÃ©crire le numero de dose, le type de vaccin et le trimestre*/
 title 'Numeros de doses';
 proc freq data=work.vaccov; tables num_vac;run;
 
@@ -111,7 +111,7 @@ title 'Trimestre';
 proc freq data=work.vaccov; tables trimester;run;
 
 
-/*Ajouter les vaccins précédant PP pour définir les profils de vaccination 
+/*Ajouter les vaccins prÃ©cÃ©dant PP pour dÃ©finir les profils de vaccination 
 en incluant tous les vaccins jusqu'a celui de la PP*/
 
 /*Profils complets*/
@@ -272,7 +272,7 @@ QUIT;
 /*Definir la periode a risque post vaccinale (en jours)*/
 %let duree=42;
 
-/*Dates de debut et fin follow_up (FU) post-vac (tronquées au vaccin suivant si existant)*/
+/*Dates de debut et fin follow_up (FU) post-vac (tronquÃ©es au vaccin suivant si existant)*/
 PROC SQL;
    CREATE TABLE WORK.regimen3 AS 
    SELECT DISTINCT t1.indsej, 
