@@ -1,15 +1,15 @@
-/*Analyse de sensibilité : Calcul des ratios Observed/expected
+/*Analyse de sensibilitÃ© : Calcul des ratios Observed/expected
 pour l'analyse principale (tous types de diagnostics, delai 42j)
-en retirant les périodes 90j post COVID du suivi "covout"*/
+en retirant les pÃ©riodes 90j post COVID du suivi "covout"*/
 
 /*Supprimer tables de WORK*/
 proc datasets lib=work kill;
 run;quit;   
 
 /*Definir la librairie ObservesAttendusAESI*/
-libname rep '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/OE_TEST';
+libname rep '...';
 /*Definir la librairie base grossesse*/
-libname baseg '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/Construction_base_20132024';
+libname baseg '...';
 
 
 /*Creer table init pour transposition finale*/
@@ -25,18 +25,18 @@ T0
 RUN;
 
 
-/*Utilisation de la macro précédente de calcul des ratios Observed/Expected 
-(stratifié selon age +/- "trimestre") avec intervalles de confiance à95%
-pour un AESI défini (diag) 
-recherché pour tous types de diagnostic (DP_only=0) ou principal seulement (DP_only=1)
+/*Utilisation de la macro prÃ©cÃ©dente de calcul des ratios Observed/Expected 
+(stratifiÃ© selon age +/- "trimestre") avec intervalles de confiance Ã 95%
+pour un AESI dÃ©fini (diag) 
+recherchÃ© pour tous types de diagnostic (DP_only=0) ou principal seulement (DP_only=1)
 pour les vaccinations de la table "allvac_42_COVOUT" 
-(excluant les périodes post infection COVID du follow up)
+(excluant les pÃ©riodes post infection COVID du follow up)
 selon type de schema vaccinal (regimen)*/
 
 
 
 %macro OBSEXP(regimen=,diag=,DP_only=);
-/*On filtre la table des vaccins avec durees FU recalculées(allvac_42_covout) selon regimen
+/*On filtre la table des vaccins avec durees FU recalculÃ©es(allvac_42_covout) selon regimen
 (parmi vaccins durant PP (LMP-70-EOPE) et <23/06/23-42) */
 PROC SQL;
    CREATE TABLE WORK.tmp1 AS 
@@ -49,7 +49,7 @@ PROC SQL;
 QUIT;
 
 
-/*Table des grossesses: grossesses présentes dans tmp1 (vaccinées)*/
+/*Table des grossesses: grossesses prÃ©sentes dans tmp1 (vaccinÃ©es)*/
 
 PROC SQL;
    CREATE TABLE WORK.tmp2 AS 
@@ -65,9 +65,9 @@ PROC SQL;
 ;
 QUIT;
 
-/* RECHERCHE DES DIAG  à partir de la table des CIM
+/* RECHERCHE DES DIAG  Ã  partir de la table des CIM
 (La table des CIM comprend tous les CIM pour les patientes de BASEG <=31dec2024)
-(tables MCO 13 à 24)*/
+(tables MCO 13 Ã  24)*/
 
 
 PROC SQL;
@@ -84,9 +84,9 @@ AND
 %end; ;
 QUIT;
 
-/*Grossesses dont le BNA est associé a >1 diagnostic + Ajout des variables:
+/*Grossesses dont le BNA est associÃ© a >1 diagnostic + Ajout des variables:
 - "during" (1 si diagnostic au cours de T0-T3 : LMP-28 / Evt -1)
--"clean_window" (1 si diagnostic dans les 365j précédant T0 pour les AESI)*/
+-"clean_window" (1 si diagnostic dans les 365j prÃ©cÃ©dant T0 pour les AESI)*/
 
 PROC SQL;
    CREATE TABLE WORK.tmp3 AS 
@@ -112,7 +112,7 @@ QUIT;
 
 
 
-/*Catégorie pour chaque grossesse associée au diag via le BNA:
+/*CatÃ©gorie pour chaque grossesse associÃ©e au diag via le BNA:
 -"hors-suivi" si >1 diag dans la clean window
 -"non-cas" si diag hors clean window et "PP"
 -"cas" si aucun diag dans clean window et >1 durant "PP"*/
@@ -252,7 +252,7 @@ QUIT;
 
 
 
-/*Ajout de TMP1: vaccins et periodes de FU post vaccinal (calculées dans script INF_COVID)
+/*Ajout de TMP1: vaccins et periodes de FU post vaccinal (calculÃ©es dans script INF_COVID)
 Calcul intersection entre duree de FU par trimestre et FU post vaccinal
 (on ne prend pas en compte la veille de l'EOPE)*/
 
@@ -402,7 +402,7 @@ PROC SQL;
 ORDER BY t1.indsej, t1.dbt_FUvac;
 QUIT;
 
-title "durée de FU post vac par vaccin";
+title "durÃ©e de FU post vac par vaccin";
 PROC MEANS DATA=work.vac_fu
 		MEAN 		STD 		MIN 		MAX 		N			Q1 		MEDIAN 		Q3	;
 	VAR total;
@@ -418,15 +418,15 @@ PROC SQL;
       FROM WORK.VAC_FU t1
       GROUP BY t1.indsej;
 QUIT;
-title "durée de FU post vac par grossesse";
+title "durÃ©e de FU post vac par grossesse";
 PROC MEANS DATA=work.vac_fu_bypreg
 		MEAN 		STD 		MIN 		MAX 		N			Q1 		MEDIAN 		Q3;
 	VAR SUM_of_total;RUN;
 
 
 	/*OBSERVED*/
-	/*On récupère la phase de l'evt seulement si la date de diag se situe 
-	dans les bornes des périodes de FU post vac*/
+	/*On rÃ©cupÃ¨re la phase de l'evt seulement si la date de diag se situe 
+	dans les bornes des pÃ©riodes de FU post vac*/
 
 	PROC SQL;
    CREATE TABLE WORK.OBS AS 
@@ -587,7 +587,7 @@ SELECT * FROM WORK.TMP14
 
 UNION
 
-/*CALCUL avec stratification : on somme tous les attendus calculés
+/*CALCUL avec stratification : on somme tous les attendus calculÃ©s
 par classe d'age (on retire "all")*/
    SELECT t1.outcome, 
           "strat" as age,
@@ -635,7 +635,7 @@ par classe d'age (on retire "all")*/
 QUIT;
 
 
-/*Ajout IC 95% bilateral et unilateral pour nombre observés (méthode exacte,Poisson)*/
+/*Ajout IC 95% bilateral et unilateral pour nombre observÃ©s (mÃ©thode exacte,Poisson)*/
 PROC SQL;
    CREATE TABLE WORK.tmp16 AS 
    SELECT t1.outcome, 
@@ -758,7 +758,7 @@ proc datasets lib=WORK noprint;
 
 
 
-/*Appliquer la macro OBSEXP à une liste de diagnostics et un regimen specifique*/
+/*Appliquer la macro OBSEXP Ã  une liste de diagnostics et un regimen specifique*/
 
 %macro OBSEXP_list(regimen=,diag_list=,DP_only=);
     %let num_diags = %sysfunc(countw(&diag_list));
