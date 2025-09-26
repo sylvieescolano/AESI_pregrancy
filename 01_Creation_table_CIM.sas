@@ -1,7 +1,7 @@
-/*Création de la table de correspondance des outcomes avec les codes CIM-10 FR*/
+/*CrÃ©ation de la table de correspondance des outcomes avec les codes CIM-10 FR*/
 
 /*Definir la librairie ObservesAttendusAESI*/
-libname rep '/home/sas/42a000245310899/sasdata/REPMEDGR/Base_Grossesse/OE_TEST';
+libname rep '...';
 
 Data REP.CIM_AESI;
 length diag $80. CIM10 $8.;
